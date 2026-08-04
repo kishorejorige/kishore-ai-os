@@ -1,122 +1,85 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useState } from "react";
+import "./App.css";
+
+type HealthResponse = {
+  status: string;
+  service: string;
+  version: string;
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [backendStatus, setBackendStatus] = useState("Checking...");
+  const [version, setVersion] = useState("");
+
+  useEffect(() => {
+    async function checkBackend() {
+      try {
+        const response = await fetch("http://127.0.0.1:8015/health");
+
+        if (!response.ok) {
+          throw new Error("Backend request failed");
+        }
+
+        const data: HealthResponse = await response.json();
+
+        setBackendStatus(
+          data.status === "healthy" ? "Connected" : "Unavailable",
+        );
+        setVersion(data.version);
+      } catch {
+        setBackendStatus("Disconnected");
+      }
+    }
+
+    checkBackend();
+  }, []);
+
+  const isConnected = backendStatus === "Connected";
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <main className="app-shell">
+      <section className="dashboard">
+        <p className="eyebrow">LOCAL AI WORKSPACE</p>
+        <h1>Kishore AI OS</h1>
+        <p className="subtitle">
+          Your private AI assistant powered by FastAPI, React, and Ollama.
+        </p>
+
+        <div className="status-grid">
+          <article className="status-card">
+            <span className={isConnected ? "dot online" : "dot offline"} />
+            <div>
+              <p className="label">Backend</p>
+              <strong>{backendStatus}</strong>
+            </div>
+          </article>
+
+          <article className="status-card">
+            <span className="dot checking" />
+            <div>
+              <p className="label">Ollama</p>
+              <strong>Coming next</strong>
+            </div>
+          </article>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
+
+        <div className="chat-card">
+          <h2>Ask Kishore AI OS</h2>
+          <textarea
+            placeholder="Ask about your projects, documents, code, or ideas..."
+            disabled
+          />
+          <button type="button" disabled>
+            Send
+          </button>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
+
+        <p className="version">
+          API version: {version || "Not available"}
+        </p>
       </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    </main>
+  );
 }
 
-export default App
+export default App;
